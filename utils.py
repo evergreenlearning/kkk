@@ -5,7 +5,7 @@ import os
 os.environ["MOONSHOT_API_KEY"] = "sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe"
 def get_chat_response(prompt, model, memory):
     # llm = ChatOllama(model=model)
-    llm = MoonshotChat()
+    llm = MoonshotChat(api-key="sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe")
     chain=ConversationChain(llm=llm, memory=memory)
     response=chain.invoke({"input":prompt})
     return response["response"]
