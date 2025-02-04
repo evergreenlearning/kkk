@@ -11,4 +11,4 @@ streamlit-vertical-slider==2.5.5
 langchain==0.3.14
 langchain-ollama==0.2.2
 langchain-community==0.3.14
-
+openai==1.59.3
