@@ -1,12 +1,22 @@
 import streamlit as st
-from utils import get_chat_response
 from langchain.memory import ConversationBufferMemory
 import base64
+from langchain.chains import ConversationChain
+from langchain_community.chat_models import MoonshotChat, ChatTongyi
+from langchain_ollama.chat_models import ChatOllama
+import os
 
 def img_to_base64(img_path):
     with open(img_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode('utf-8')
-
+        
+def get_chat_response(prompt, model, memory):
+    # llm = ChatOllama(model=model)
+    llm = MoonshotChat(api-key="sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe")
+    chain=ConversationChain(llm=llm, memory=memory)
+    response=chain.invoke({"input":prompt})
+    return response["response"]
+    
 # 加载头像图片并转换为Base64
 user_avatar_path = 'human.png'  # 替换为您的用户头像路径
 ai_avatar_path = 'bot.png'  # 替换为您的AI头像路径
