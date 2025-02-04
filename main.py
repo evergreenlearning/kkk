@@ -1,69 +1,117 @@
 import streamlit as st
+import os
+from langchain_ollama.chat_models import ChatOllama
+from langchain_community.chat_models import MoonshotChat, ChatTongyi
 from langchain.memory import ConversationBufferMemory
 import base64
-from langchain.chains import ConversationChain
-from langchain_community.chat_models import MoonshotChat, ChatTongyi
-from langchain_ollama.chat_models import ChatOllama
-import os
 
+# ========== 头像处理 ==========
 def img_to_base64(img_path):
     with open(img_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode('utf-8')
-        
-def get_chat_response(prompt, model, memory):
-    # llm = ChatOllama(model=model)
-    llm = MoonshotChat(api_key="")
-    chain=ConversationChain(llm=llm, memory=memory)
-    response=chain.invoke({"input":prompt})
-    return response["response"]
-    
-# 加载头像图片并转换为Base64
-user_avatar_path = 'human.png'  # 替换为您的用户头像路径
-ai_avatar_path = 'bot.png'  # 替换为您的AI头像路径
+        return base64.b64encode(img_file.read()).decode("utf-8")
+
+# 加载头像图片
+user_avatar_path = "human.png"
+ai_avatar_path = "bot.png"
 user_avatar_base64 = img_to_base64(user_avatar_path)
 ai_avatar_base64 = img_to_base64(ai_avatar_path)
 
+# ========== 环境变量 ==========
+os.environ["MOONSHOT_API_KEY"] = "sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe"
+os.environ["DASHSCOPE_API_KEY"] = "sk-987f7ca356da440cb996b059ab846303"
+
+# ========== 初始化对话记忆 ==========
+if "memory" not in st.session_state:
+    st.session_state.memory = ConversationBufferMemory()
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# ========== 获取模型流式响应 ==========
+def get_chat_response_stream(prompt, model, memory):
+    # llm = MoonshotChat(api_key="sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe")
+    llm = ChatOllama(model=model)
+    history_data = memory.load_memory_variables({})
+    chat_history = history_data.get("history", [])
+
+    if not isinstance(chat_history, list):
+        chat_history = []
+
+    messages = chat_history + [{"role": "user", "content": prompt}]
+
+    for chunk in llm.stream(messages):
+        if chunk.content:
+            yield chunk.content
+
+# ========== 自定义消息显示（带头像） ==========
+def display_message(role, content):
+    """使用 HTML+CSS 定制化消息格式"""
+    if role == "user":
+        alignment = "flex-end"  # 右对齐
+        avatar = user_avatar_base64
+        color = "#f0f0f2"  # 灰色气泡
+        st.markdown(
+            f"""
+                <div style="display: flex; justify-content: {alignment}; align-items: center; margin: 10px 0;">
+                    <div style="background-color: {color}; padding: 10px; border-radius: 10px; max-width: 80%; word-wrap: break-word; font-size: 16px;">
+                        {content}
+                    </div>
+                    <img src="data:image/png;base64,{avatar}" style="width: 35px; height: 35px; border-radius: 50%; margin-left: 10px;">
+                </div>
+                """,
+            unsafe_allow_html=True
+        )
+    else:
+        alignment = "flex-start"  # 左对齐
+        avatar = ai_avatar_base64
+        color = "#f0f0f2"  # 灰色气泡
+
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: {alignment}; align-items: center; margin: 10px 0;">
+                <div style="background-color: {color}; padding: 10px; border-radius: 10px; max-width: 80%; word-wrap: break-word; font-size: 16px;">
+                    {content}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+# ========== Streamlit 界面 ==========
 st.title("KK-AI助手")
 
 # 选择模型
 models = [
     "qwen2:7b",
-    "qwen2.5:latest"
+    "qwen2.5:latest",
+    "deepseek-r1:latest"
 ]
 select_model = st.sidebar.selectbox(label="选择模型", options=models)
-st.write(select_model)
 
-# 初始化会话状态
-if "memory" not in st.session_state:
-    st.session_state["memory"] = ConversationBufferMemory(return_messages=True)
-    st.session_state["messages"] = [{"role": "ai", "content": "你好，我是你的AI助手，有什么可以帮你的吗？"}]
+# 显示历史对话（带头像）
+for message in st.session_state.messages:
+    display_message(message["role"], message["content"])
 
+# 处理用户输入
+if prompt := st.chat_input("请输入你的问题..."):
+    # 显示用户输入
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    display_message("user", prompt)
 
-def display_message(message, user_avatar_base64, ai_avatar_base64):
-    if message["role"] == "human":
-        st.markdown(
-            f'<div style="display: flex; justify-content: flex-end; color: blue;"><div class="user-message">{message["content"]} <img class="avatar" src="data:image/png;base64,{user_avatar_base64}" style="width:25px;height:25px;" /></div></div>',
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            f'<div class="assistant-message" style="text-align: left; color: black;"><img class="avatar" src="data:image/png;base64,{ai_avatar_base64}" style="width:30px;height:30px;" /> {message["content"]}</div>',
-            unsafe_allow_html=True,
-        )
+    # AI 回复
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        response = ""
 
-# 显示所有历史消息
-for message in st.session_state["messages"]:
-    display_message(message, user_avatar_base64, ai_avatar_base64)
+        # 获取流式响应
+        for chunk in get_chat_response_stream(prompt, model=select_model, memory=st.session_state.memory):
+            response += chunk
+            message_placeholder.markdown(response)
 
-# 用户输入
-prompt = st.chat_input("在这里输入...")
-if prompt:
-    st.session_state["messages"].append({"role": "human", "content": prompt})
-    display_message({"role": "human", "content": prompt}, user_avatar_base64, ai_avatar_base64)
+        # 记录 AI 回复
+        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.memory.save_context({"input": prompt}, {"output": response})
 
-    with st.spinner("AI正在飞速加载中..."):
-        response = get_chat_response(prompt=prompt, model=select_model, memory=st.session_state["memory"])
-
-    msg = {"role": "ai", "content": response}
-    st.session_state["messages"].append(msg)
-    display_message(msg, user_avatar_base64, ai_avatar_base64)
+        # 再次渲染 AI 消息（带头像）
+        message_placeholder.empty()  # 清除占位符
+        display_message("assistant", response)
