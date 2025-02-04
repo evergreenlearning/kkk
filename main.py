@@ -12,21 +12,36 @@ def img_to_base64(img_path):
 
 # 加载头像图片
 user_avatar_path = "human.png"
-ai_avatar_path = "bot.png"
 user_avatar_base64 = img_to_base64(user_avatar_path)
-ai_avatar_base64 = img_to_base64(ai_avatar_path)
+
+# ========== 环境变量 ==========
+os.environ["MOONSHOT_API_KEY"] = "sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe"
+os.environ["DASHSCOPE_API_KEY"] = ""
 
 # ========== 初始化对话记忆 ==========
-if "memory" not in st.session_state:
+if "conversations" not in st.session_state:
+    st.session_state.conversations = {"默认对话": []}
+    st.session_state.current_conversation = "默认对话"
     st.session_state.memory = ConversationBufferMemory()
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+# ========== 选择或新建对话 ==========
+st.sidebar.title("对话管理")
+conversation_names = list(st.session_state.conversations.keys())
+selected_conversation = st.sidebar.selectbox("选择对话", conversation_names)
+new_conversation_name = st.sidebar.text_input("新建对话名称")
+if st.sidebar.button("新建对话") and new_conversation_name:
+    if new_conversation_name not in st.session_state.conversations:
+        st.session_state.conversations[new_conversation_name] = []
+        st.session_state.current_conversation = new_conversation_name
+        st.session_state.memory = ConversationBufferMemory()
+        st.rerun()
+
+st.session_state.current_conversation = selected_conversation
+st.session_state.messages = st.session_state.conversations[selected_conversation]
 
 # ========== 获取模型流式响应 ==========
 def get_chat_response_stream(prompt, model, memory):
-    llm = MoonshotChat(api_key="")
-    # llm = ChatOllama(model=model)
+    llm = ChatOllama(model=model)
     history_data = memory.load_memory_variables({})
     chat_history = history_data.get("history", [])
 
@@ -59,9 +74,7 @@ def display_message(role, content):
         )
     else:
         alignment = "flex-start"  # 左对齐
-        avatar = ai_avatar_base64
         color = "#f0f0f2"  # 灰色气泡
-
         st.markdown(
             f"""
             <div style="display: flex; justify-content: {alignment}; align-items: center; margin: 10px 0;">
@@ -74,7 +87,10 @@ def display_message(role, content):
         )
 
 # ========== Streamlit 界面 ==========
-st.title("KK-AI助手")
+title = "KK-AI助手"
+st.markdown(f"""
+    <h1 style="color: blue; font-size: 30px; font-weight: bold; text-align: center;">{title}</h1>
+    """, unsafe_allow_html=True)
 
 # 选择模型
 models = [
@@ -83,7 +99,7 @@ models = [
     "deepseek-r1:latest"
 ]
 select_model = st.sidebar.selectbox(label="选择模型", options=models)
-
+st.write(select_model)
 # 显示历史对话（带头像）
 for message in st.session_state.messages:
     display_message(message["role"], message["content"])
@@ -104,10 +120,9 @@ if prompt := st.chat_input("请输入你的问题..."):
             response += chunk
             message_placeholder.markdown(response)
 
-        # 记录 AI 回复
         st.session_state.messages.append({"role": "assistant", "content": response})
         st.session_state.memory.save_context({"input": prompt}, {"output": response})
+        st.session_state.conversations[selected_conversation] = st.session_state.messages  # 更新对话历史
 
-        # 再次渲染 AI 消息（带头像）
         message_placeholder.empty()  # 清除占位符
         display_message("assistant", response)
