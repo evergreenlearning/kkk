@@ -16,10 +16,6 @@ ai_avatar_path = "bot.png"
 user_avatar_base64 = img_to_base64(user_avatar_path)
 ai_avatar_base64 = img_to_base64(ai_avatar_path)
 
-# ========== 环境变量 ==========
-os.environ["MOONSHOT_API_KEY"] = "sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe"
-os.environ["DASHSCOPE_API_KEY"] = "sk-987f7ca356da440cb996b059ab846303"
-
 # ========== 初始化对话记忆 ==========
 if "memory" not in st.session_state:
     st.session_state.memory = ConversationBufferMemory()
@@ -29,7 +25,7 @@ if "messages" not in st.session_state:
 
 # ========== 获取模型流式响应 ==========
 def get_chat_response_stream(prompt, model, memory):
-    llm = MoonshotChat(api_key="sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe")
+    llm = MoonshotChat(api_key="")
     # llm = ChatOllama(model=model)
     history_data = memory.load_memory_variables({})
     chat_history = history_data.get("history", [])
