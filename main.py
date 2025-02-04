@@ -12,7 +12,7 @@ def img_to_base64(img_path):
         
 def get_chat_response(prompt, model, memory):
     # llm = ChatOllama(model=model)
-    llm = MoonshotChat(api-key="sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe")
+    llm = MoonshotChat(api_key="sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe")
     chain=ConversationChain(llm=llm, memory=memory)
     response=chain.invoke({"input":prompt})
     return response["response"]
