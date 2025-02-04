@@ -29,8 +29,8 @@ if "messages" not in st.session_state:
 
 # ========== 获取模型流式响应 ==========
 def get_chat_response_stream(prompt, model, memory):
-    # llm = MoonshotChat(api_key="sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe")
-    llm = ChatOllama(model=model)
+    llm = MoonshotChat(api_key="sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe")
+    # llm = ChatOllama(model=model)
     history_data = memory.load_memory_variables({})
     chat_history = history_data.get("history", [])
 
