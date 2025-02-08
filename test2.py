@@ -3,6 +3,7 @@ import os
 from langchain_ollama.chat_models import ChatOllama
 from langchain_community.chat_models import MoonshotChat, ChatTongyi
 from langchain.memory import ConversationBufferMemory
+from langchain_deepseek.chat_models import ChatDeepSeek
 import base64
 
 # ========== 头像处理 ==========
@@ -41,18 +42,31 @@ st.session_state.messages = st.session_state.conversations[selected_conversation
 
 # ========== 获取模型流式响应 ==========
 def get_chat_response_stream(prompt, model, memory):
-    llm = ChatOllama(model=model)
-    history_data = memory.load_memory_variables({})
-    chat_history = history_data.get("history", [])
+    if "deepseek-r1" in model:
+        llm = ChatDeepSeek(model="deepseek-r1", api_key="sk-2148ec7d29cd4570ae91fdb15a81cc1d")
+        history_data = memory.load_memory_variables({})
+        chat_history = history_data.get("history", [])
+        if not isinstance(chat_history, list):
+            chat_history = []
 
-    if not isinstance(chat_history, list):
-        chat_history = []
+        messages = chat_history + [{"role": "user", "content": prompt}]
 
-    messages = chat_history + [{"role": "user", "content": prompt}]
+        for chunk in llm.stream(messages):
+            if chunk.content:
+                yield chunk.content
+    else:
+        llm = ChatOllama(model=model)
+        history_data = memory.load_memory_variables({})
+        chat_history = history_data.get("history", [])
 
-    for chunk in llm.stream(messages):
-        if chunk.content:
-            yield chunk.content
+        if not isinstance(chat_history, list):
+            chat_history = []
+
+        messages = chat_history + [{"role": "user", "content": prompt}]
+
+        for chunk in llm.stream(messages):
+            if chunk.content:
+                yield chunk.content
 
 # ========== 自定义消息显示（带头像） ==========
 def display_message(role, content):
