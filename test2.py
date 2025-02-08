@@ -43,7 +43,7 @@ st.session_state.messages = st.session_state.conversations[selected_conversation
 # ========== 获取模型流式响应 ==========
 def get_chat_response_stream(prompt, model, memory):
     if "deepseek-r1" in model:
-        llm = ChatDeepSeek(model="deepseek-r1", api_key="sk-2148ec7d29cd4570ae91fdb15a81cc1d")
+        llm = ChatDeepSeek(model="deepseek-reasoner", api_key="sk-2148ec7d29cd4570ae91fdb15a81cc1d")
         history_data = memory.load_memory_variables({})
         chat_history = history_data.get("history", [])
         if not isinstance(chat_history, list):
