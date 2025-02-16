@@ -1,15 +1,15 @@
 import streamlit as st
 import os
-from langchain_ollama.chat_models import ChatOllama
+# from langchain_ollama.chat_models import ChatOllama
 from langchain_community.chat_models import MoonshotChat, ChatTongyi
 from langchain.memory import ConversationBufferMemory
-from langchain_deepseek.chat_models import ChatDeepSeek
+# from langchain_deepseek.chat_models import ChatDeepSeek
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 import base64
 
-# ========== 环境变量 ==========
-os.environ["MOONSHOT_API_KEY"] = "sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe"
-os.environ["DASHSCOPE_API_KEY"] = "sk-987f7ca356da440cb996b059ab846303"
+# # ========== 环境变量 ==========
+# os.environ["MOONSHOT_API_KEY"] = "sk-T009onh3gF4BQonapjO6KFV6CDxsV8XIMaPP1sj13eNTw0oe"
+# os.environ["DASHSCOPE_API_KEY"] = "sk-987f7ca356da440cb996b059ab846303"
 
 # ========== 头像处理 ==========
 def img_to_base64(img_path):
@@ -53,17 +53,17 @@ def get_chat_response_stream(prompt, model, memory):
                 model="deepseek-ai/deepseek-r1",
                 api_key=nvidia_api_key
             )
-        elif "v3" in model:
-            llm = ChatDeepSeek(model="deepseek-chat", api_key=deepseek_api_key)
-    elif "qwen" in model:
-        if "max" in model:
-            llm = ChatTongyi(model="qwen-max")
-        elif "plus" in model:
-            llm = ChatTongyi(model="qwen-plus")
+        # elif "v3" in model:
+        #     llm = ChatDeepSeek(model="deepseek-chat", api_key=deepseek_api_key)
+    # elif "qwen" in model:
+    #     if "max" in model:
+    #         llm = ChatTongyi(model="qwen-max")
+    #     elif "plus" in model:
+    #         llm = ChatTongyi(model="qwen-plus")
     elif model =="kimi-default-online":
         llm = MoonshotChat()
-    elif "local" in model:
-        llm = ChatOllama(model=model.split("-local")[0])
+    # elif "local" in model:
+    #     llm = ChatOllama(model=model.split("-local")[0])
     history_data = memory.load_memory_variables({})
     chat_history = history_data.get("history", [])
 
@@ -115,10 +115,10 @@ st.markdown(f"""
 
 # 选择模型
 models = [
-    "deepseek-r1:latest-local",
-    "qwen-max-online",
-    "qwen-plus-online",
-    "deepseek-v3-online",
+    # "deepseek-r1:latest-local",
+    # "qwen-max-online",
+    # "qwen-plus-online",
+    # "deepseek-v3-online",
     "deepseek-r1-online",
     "kimi-default-online"
 ]
