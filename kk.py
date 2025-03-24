@@ -52,8 +52,8 @@ def get_chat_response_stream(prompt, model, memory):
                 model="deepseek-ai/deepseek-r1",
                 api_key=deepseek_api_key
             )
-        # elif "v3" in model:
-        #     llm = ChatDeepSeek(model="deepseek-chat", api_key=deepseek_api_key)
+        elif "v3" in model:
+            llm = ChatDeepSeek(model="deepseek-chat", api_key=deepseek_api_key)
     # elif "qwen" in model:
     #     if "max" in model:
     #         llm = ChatTongyi(model="qwen-max")
