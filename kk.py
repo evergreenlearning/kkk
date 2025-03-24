@@ -3,8 +3,7 @@ import os
 # from langchain_ollama.chat_models import ChatOllama
 from langchain_community.chat_models import MoonshotChat, ChatTongyi
 from langchain.memory import ConversationBufferMemory
-# from langchain_deepseek.chat_models import ChatDeepSeek
-from langchain_nvidia_ai_endpoints import ChatNVIDIA
+from langchain_deepseek.chat_models import ChatDeepSeek
 import base64
 
 # # ========== 环境变量 ==========
@@ -47,11 +46,11 @@ def get_chat_response_stream(prompt, model, memory):
     
     if "deepseek" in model and "online" in model:
         deepseek_api_key = "sk-2148ec7d29cd4570ae91fdb15a81cc1d"
-        nvidia_api_key = "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"
+        # nvidia_api_key = "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"
         if "r1" in model:
-            llm = ChatNVIDIA(
+            llm = ChatDeepSeek(
                 model="deepseek-ai/deepseek-r1",
-                api_key=nvidia_api_key
+                api_key=deepseek_api_key
             )
         # elif "v3" in model:
         #     llm = ChatDeepSeek(model="deepseek-chat", api_key=deepseek_api_key)
