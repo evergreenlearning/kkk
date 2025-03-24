@@ -14,7 +14,7 @@ def img_to_base64(img_path):
     with open(img_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode("utf-8")
 # 加载头像图片
-user_avatar_path = "./common_data/human.png"
+user_avatar_path = "./human.png"
 user_avatar_base64 = img_to_base64(user_avatar_path)
 
 
