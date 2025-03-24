@@ -3,7 +3,6 @@ import os
 # from langchain_ollama.chat_models import ChatOllama
 from langchain_community.chat_models import MoonshotChat, ChatTongyi
 from langchain.memory import ConversationBufferMemory
-from langchain_deepseek.chat_models import ChatDeepSeek
 import base64
 
 # # ========== 环境变量 ==========
@@ -118,7 +117,7 @@ models = [
     # "qwen-max-online",
     # "qwen-plus-online",
     # "deepseek-v3-online",
-    "deepseek-r1-online",
+    # "deepseek-r1-online",
     "kimi-default-online"
 ]
 select_model = st.sidebar.selectbox(label="选择模型", options=models)
